@@ -1,13 +1,31 @@
 import net from 'net';
+import * as turf from '@turf/turf';
+import { verificaPonto, calculaDistancia } from './turf.js';
 
 let esp32Socket;
 
 const esp32server = net.createServer((socket) => {
-    console.log('Cliente conectado');
+    console.log('Cliente ESP32 conectado');
     
     esp32Socket = socket;
 
     socket.setEncoding('utf8');
+
+    socket.on('data', (data) =>{
+        let coordinate = JSON.parse(data.toString());
+        let point = turf.point([coordinate.lon, coordinate.lat])
+
+        let result = verificaPonto(point);
+        let distance = calculaDistancia(point)
+
+        if(result){
+            console.log("Está dentro");
+        }
+        else{
+            console.log("Está fora");
+        }
+        console.log("A distância entre os pontos é de: " + distance);
+    });
     
     socket.on('end', () => {
         console.log('Cliente desconectado');
