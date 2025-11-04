@@ -1,7 +1,7 @@
 import net from 'net';
 import * as turf from '@turf/turf';
 import { verificaPonto, calculaDistancia } from './turf.js';
-
+import { sendPointToHttpServer, mostrarAlerta, naoMostrarAlerta } from './httpServer.js';
 let esp32Socket;
 
 const esp32server = net.createServer((socket) => {
@@ -17,12 +17,16 @@ const esp32server = net.createServer((socket) => {
 
         let result = verificaPonto(point);
         let distance = calculaDistancia(point)
+        
+        sendPointToHttpServer(point);
 
         if(result){
             console.log("Está dentro");
+            naoMostrarAlerta();
         }
         else{
-            console.log("Está fora");
+            sendMessageToEsp32("ATIVAR_SAFEWAY");
+            mostrarAlerta();
         }
         console.log("A distância entre os pontos é de: " + distance);
     });
